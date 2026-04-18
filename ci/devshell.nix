@@ -10,7 +10,8 @@
       devShells.default = pkgs.mkShell {
         name = "devshell";
 
-        packages = [
+        packages = with pkgs; [
+          treefmt
           config.packages."ci:treefmt:sync"
         ];
 
