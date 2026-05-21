@@ -2,3 +2,4 @@ treefmt.toml
 result
 .codex
 .reference
+**/*.qcow2
