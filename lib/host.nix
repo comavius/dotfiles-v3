@@ -33,6 +33,12 @@
           description = "NixOS and Home Manager state version.";
         };
 
+        hasNvidiaGpu = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Whether this host has an NVIDIA GPU.";
+        };
+
         initialPassword = lib.mkOption {
           type = lib.types.str;
           default = "nixos";
