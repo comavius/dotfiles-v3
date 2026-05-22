@@ -22,6 +22,7 @@ let
         {
           nixpkgs.config = nixpkgsConfig;
         }
+        inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager
         ../nixos
         ./nixos.nix

@@ -1,5 +1,32 @@
-{ pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
+  colors = config.lib.stylix.colors.withHashtag;
+  styleSource = pkgs.writeText "waybar-style-source.css" (
+    lib.replaceStrings
+      [
+        "stylix-theme-base-color"
+        "stylix-theme-text-color"
+        "stylix-theme-bg-color"
+        "stylix-theme-selected-bg-color"
+        "stylix-error-color"
+        "stylix-warning-color"
+      ]
+      [
+        colors.base00
+        colors.base05
+        colors.base01
+        colors.base0D
+        colors.base08
+        colors.base09
+      ]
+      (builtins.readFile ./style.css)
+  );
+
   compiledStyle =
     pkgs.runCommand "waybar-style.css"
       {
@@ -7,10 +34,12 @@ let
         NODE_PATH = "${pkgs.nodePackages.postcss}/lib/node_modules";
       }
       ''
-        node ${./postcss-waybar-style.js} ${./style.css} "$out"
+        node ${./postcss-waybar-style.js} ${styleSource} "$out"
       '';
 in
 {
+  stylix.targets.waybar.enable = false;
+
   programs.waybar = {
     enable = true;
     settings = {

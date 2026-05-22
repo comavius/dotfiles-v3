@@ -1,11 +1,11 @@
 :root {
-  --theme-base-color: #14161b;
-  --theme-text-color: #eeeeee;
-  --theme-bg-color: #282a2b;
-  --theme-selected-bg-color: #3498db;
-  --error-color: #cd3f45;
-  --warning-color: #db7b55;
-  --background-color: #14161b;
+  --theme-base-color: stylix-theme-base-color;
+  --theme-text-color: stylix-theme-text-color;
+  --theme-bg-color: stylix-theme-bg-color;
+  --theme-selected-bg-color: stylix-theme-selected-bg-color;
+  --error-color: stylix-error-color;
+  --warning-color: stylix-warning-color;
+  --background-color: stylix-theme-base-color;
 }
 
 @keyframes blink-warning {
