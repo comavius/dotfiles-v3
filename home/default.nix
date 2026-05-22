@@ -1,4 +1,5 @@
 {
+  pkgs,
   config,
   ...
 }:
@@ -18,4 +19,24 @@ in
   };
 
   programs.home-manager.enable = true;
+
+  home.packages = with pkgs; [
+    bottom
+    gping
+    dive
+    fastfetch
+    zellij
+    firefox
+    nixd
+    obs-studio
+    libreoffice
+    go
+    go-tools
+    clang-tools
+    poppler-utils
+    wl-clipboard
+    vscode
+    discord
+    google-chrome
+  ];
 }

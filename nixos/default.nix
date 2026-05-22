@@ -6,5 +6,6 @@
     ./system.nix
     ./virtualisation.nix
     ./user.nix
+    ./devtools.nix
   ];
 }
