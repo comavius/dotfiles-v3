@@ -1,0 +1,31 @@
+version = "1.1.16"
+
+[format]
+dedup = true
+dedup_inactive_fullscreen = false
+delim = " "
+client = "{icon}{delim}"
+client_active = "{icon}{delim}"
+client_dup = "{icon}{counter_sup}{delim}"
+client_dup_fullscreen = "[{icon}]{delim}{icon}{counter_unfocused_sup}"
+client_fullscreen = "[{icon}]{delim}"
+workspace = "{id}: {clients}"
+workspace_empty = "{id}"
+
+[class]
+DEFAULT = ""
+"(?i)kitty" = ""
+"(?i)firefox" = ""
+"(?i)chromium" = ""
+"(?i)code" = ""
+"(?i)discord" = ""
+"(?i)nemo" = ""
+"(?i)obsidian" = "󰠮"
+"(?i)org.telegram.desktop" = ""
+"(?i)spotify" = ""
+"(?i)steam" = ""
+"(?i)vlc" = ""
+"(?i)wofi" = ""
+
+[exclude]
+"" = "^$"

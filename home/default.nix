@@ -8,6 +8,7 @@ in
 {
   imports = [
     ./hyprland
+    ./waybar
   ];
 
   home = {

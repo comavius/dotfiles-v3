@@ -7,9 +7,11 @@
 let
   cfg = config.my;
 
+  autonameWorkspacesConfig = ./autoname-workspaces.toml;
+
   replacementRule = {
     "@hyprland-autoname-workspaces@" =
-      "${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces";
+      "${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces --config ${autonameWorkspacesConfig}";
     "@kitty@" = "${pkgs.kitty}/bin/kitty";
     "@mako@" = "${pkgs.mako}/bin/mako";
     "@waybar@" = "${pkgs.waybar}/bin/waybar";
@@ -33,7 +35,6 @@ lib.mkMerge [
   {
     programs.kitty.enable = true;
     programs.wofi.enable = true;
-    programs.waybar.enable = true;
 
     services.hypridle.enable = true;
     services.mako.enable = true;

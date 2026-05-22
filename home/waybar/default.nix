@@ -1,0 +1,162 @@
+{ pkgs, ... }:
+let
+  compiledStyle =
+    pkgs.runCommand "waybar-style.css"
+      {
+        nativeBuildInputs = [ pkgs.nodejs ];
+        NODE_PATH = "${pkgs.nodePackages.postcss}/lib/node_modules";
+      }
+      ''
+        node ${./postcss-waybar-style.js} ${./style.css} "$out"
+      '';
+in
+{
+  programs.waybar = {
+    enable = true;
+    settings = {
+      mainBar = {
+        layer = "top";
+        height = 30;
+        position = "top";
+        reload_style_on_change = true;
+        modules-left = [
+          "custom/menu"
+          "hyprland/workspaces"
+        ];
+        modules-center = [
+          "hyprland/window"
+        ];
+        modules-right = [
+          "cpu"
+          "memory"
+          "battery"
+          "network"
+          "bluetooth"
+          "pulseaudio"
+          "backlight"
+          "tray"
+          "clock"
+        ];
+        "custom/menu" = {
+          format = "";
+          on-click = "${pkgs.wofi}/bin/wofi --show drun";
+          tooltip = false;
+        };
+        "hyprland/workspaces" = {
+          format = "{name}";
+          persistent-workspaces = {
+            "*" = 10;
+          };
+        };
+        "hyprland/window" = {
+          format = "{}";
+          max-length = 80;
+          separate-outputs = true;
+        };
+        cpu = {
+          interval = 10;
+          format = "󰘚";
+          tooltip-format = "{usage}% used";
+          states = {
+            warning = 70;
+            critical = 90;
+          };
+        };
+        memory = {
+          interval = 10;
+          format = "󰍛";
+          tooltip-format = "{used:0.1f}GiB/{total:0.1f}GiB";
+          states = {
+            warning = 70;
+            critical = 90;
+          };
+        };
+        battery = {
+          interval = 30;
+          states = {
+            warning = 30;
+            critical = 15;
+          };
+          format-charging = "󰂄 {capacity}%";
+          format = "{icon} {capacity}%";
+          format-icons = [
+            "󱃍"
+            "󰁺"
+            "󰁼"
+            "󰁽"
+            "󰁾"
+            "󰁿"
+            "󰂀"
+            "󰂁"
+            "󰂂"
+            "󰁹"
+          ];
+          tooltip = true;
+        };
+        network = {
+          interval = 5;
+          format-wifi = "{icon}";
+          format-ethernet = "󰈀";
+          format-disconnected = "󰖪";
+          format-disabled = "󰀝";
+          format-icons = [
+            "󰤯"
+            "󰤟"
+            "󰤢"
+            "󰤥"
+            "󰤨"
+          ];
+          tooltip-format = "{ifname}: {ipaddr}";
+          tooltip-format-wifi = "{ifname} ({essid}): {ipaddr}";
+          tooltip-format-disconnected = "disconnected";
+        };
+        bluetooth = {
+          format = "󰂯";
+          format-disabled = "󰂲";
+          on-click-right = "rfkill toggle bluetooth";
+          tooltip-format = "{}";
+        };
+        pulseaudio = {
+          scroll-step = 5;
+          format = "{icon} {volume}%";
+          format-muted = "󰖁";
+          format-icons = {
+            headphone = "󰋋";
+            headset = "󰋎";
+            default = [
+              "󰕿"
+              "󰖀"
+              "󰕾"
+            ];
+          };
+          tooltip-format = "{volume}%";
+        };
+        backlight = {
+          format = "{icon} {percent}%";
+          format-icons = [
+            "󰃞"
+            "󰃟"
+            "󰃠"
+          ];
+        };
+        tray = {
+          icon-size = 21;
+          spacing = 5;
+        };
+        clock = {
+          interval = 60;
+          format = "{:%e %b %Y %H:%M}";
+          tooltip = true;
+          tooltip-format = "<big>{:%B %Y}</big>\n<tt>{calendar}</tt>";
+        };
+      };
+    };
+  };
+
+  xdg.configFile."waybar/style.css".source = compiledStyle;
+
+  home.packages = with pkgs; [
+    adwaita-icon-theme
+    papirus-icon-theme
+  ];
+}

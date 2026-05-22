@@ -13,7 +13,11 @@
     {
       treefmt = {
         projectRootFile = "flake.nix";
-
+        programs.biome = {
+          enable = true;
+          formatCommand = "format";
+          settings = builtins.fromJSON (builtins.readFile ../biome.json);
+        };
         programs.nixfmt.enable = true;
       };
 

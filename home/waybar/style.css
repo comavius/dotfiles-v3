@@ -1,0 +1,128 @@
+:root {
+  --theme-base-color: #14161b;
+  --theme-text-color: #eeeeee;
+  --theme-bg-color: #282a2b;
+  --theme-selected-bg-color: #3498db;
+  --error-color: #cd3f45;
+  --warning-color: #db7b55;
+  --background-color: #14161b;
+}
+
+@keyframes blink-warning {
+  to {
+    color: var(--theme-base-color);
+    background-color: var(--warning-color);
+  }
+}
+
+@keyframes blink-critical {
+  to {
+    color: var(--theme-base-color);
+    background-color: var(--error-color);
+  }
+}
+
+* {
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  font-family:
+    "JetBrainsMono Nerd Font", "JetBrainsMono NF", "Roboto Mono", sans-serif;
+}
+
+window#waybar {
+  background: var(--theme-base-color);
+  color: var(--theme-text-color);
+  font-size: 14px;
+}
+
+#custom-menu,
+#workspaces,
+#window,
+#cpu,
+#memory,
+#battery,
+#network,
+#bluetooth,
+#pulseaudio,
+#backlight,
+#tray,
+#clock {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+#custom-menu,
+#workspaces button.active,
+#clock {
+  color: var(--theme-bg-color);
+  background-color: var(--theme-selected-bg-color);
+}
+
+#custom-menu {
+  padding-left: 8px;
+  padding-right: 13px;
+}
+
+#workspaces button {
+  border-top: 2px solid transparent;
+  padding-bottom: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
+  color: var(--theme-selected-bg-color);
+}
+
+#workspaces button.active {
+  border-color: var(--theme-selected-bg-color);
+}
+
+#workspaces button.urgent {
+  border-color: var(--error-color);
+  color: var(--error-color);
+}
+
+#workspaces button:hover {
+  color: var(--theme-bg-color);
+  background-color: var(--theme-selected-bg-color);
+}
+
+#window {
+  color: var(--theme-text-color);
+}
+
+#cpu.warning,
+#memory.warning,
+#network.disconnected,
+#bluetooth.disabled,
+#pulseaudio.muted,
+#battery.warning {
+  color: var(--warning-color);
+}
+
+#cpu.critical,
+#memory.critical,
+#battery.critical {
+  color: var(--error-color);
+}
+
+#battery.warning.discharging {
+  animation-name: blink-warning;
+  animation-duration: 3s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+#battery.critical.discharging {
+  animation-name: blink-critical;
+  animation-duration: 2s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+#clock {
+  font-weight: bold;
+}
