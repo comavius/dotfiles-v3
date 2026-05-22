@@ -22,6 +22,7 @@ let
         {
           nixpkgs.config = nixpkgsConfig;
         }
+        inputs.disko.nixosModules.disko
         inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager
         ../nixos
@@ -35,6 +36,8 @@ let
 
             config = {
               my = host;
+
+              disko = lib.mkIf (host.disko != null) host.disko;
 
               home-manager = {
                 useGlobalPkgs = true;

@@ -51,6 +51,18 @@
           description = "Initial password for the primary user.";
         };
 
+        disko = lib.mkOption {
+          type = lib.types.nullOr lib.types.attrs;
+          default = null;
+          description = "Disko configuration for this host.";
+        };
+
+        zramSwapSizeGiB = lib.mkOption {
+          type = lib.types.nullOr lib.types.ints.positive;
+          default = null;
+          description = "Zram swap size in GiB. Disabled when null.";
+        };
+
         modules = lib.mkOption {
           type = lib.types.listOf lib.types.deferredModule;
           default = [ ];
