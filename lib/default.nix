@@ -5,21 +5,26 @@
   ...
 }:
 let
-  hostLib = import ./host { inherit lib; };
+  hostLib = import ./host.nix { inherit lib; };
+
+  nixpkgsConfig = {
+    allowUnfreePredicate = import ../non-module/allowUnfreePredicate.nix;
+  };
 
   mkNixosFromHost =
-    {
-      host,
-      isVm,
-    }:
+    { host }:
     inputs.nixpkgs.lib.nixosSystem {
       inherit (host) system;
       specialArgs = {
         inherit inputs;
       };
       modules = [
+        {
+          nixpkgs.config = nixpkgsConfig;
+        }
         inputs.home-manager.nixosModules.home-manager
         ../nixos
+        ./nixos.nix
         (
           { ... }:
           {
@@ -53,12 +58,6 @@ let
             };
           }
         )
-        (
-          { ... }:
-          {
-            my.isVm = isVm;
-          }
-        )
       ]
       ++ host.modules;
     };
@@ -80,7 +79,6 @@ in
       name: host:
       lib.nameValuePair name (mkNixosFromHost {
         host = host;
-        isVm = false;
       })
     ) config.my.hosts
   );
@@ -95,7 +93,6 @@ in
         let
           nixosConfiguration = mkNixosFromHost {
             host = host;
-            isVm = true;
           };
         in
         lib.nameValuePair "${name}-vm" {

@@ -1,10 +1,10 @@
 { ... }:
 {
   imports = [
-    ./desktop
-    ./font
-    ./system
-    ./virtualisation
-    ./user
+    ./desktop.nix
+    ./font.nix
+    ./system.nix
+    ./virtualisation.nix
+    ./user.nix
   ];
 }

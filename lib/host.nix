@@ -33,12 +33,6 @@
           description = "NixOS and Home Manager state version.";
         };
 
-        isVm = lib.mkOption {
-          type = lib.types.bool;
-          default = null;
-          description = "Whether this host configuration is for a VM.";
-        };
-
         initialPassword = lib.mkOption {
           type = lib.types.str;
           default = "nixos";
