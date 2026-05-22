@@ -93,7 +93,9 @@ in
         name: host:
         let
           nixosConfiguration = mkNixosFromHost {
-            host = host;
+            host = host // {
+              isVm = true;
+            };
           };
           runVm = pkgs.writeShellApplication {
             name = "run-${name}-vm";

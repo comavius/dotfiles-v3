@@ -39,6 +39,12 @@
           description = "Whether this host has an NVIDIA GPU.";
         };
 
+        isVm = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Whether this host is virtual machine or not.";
+        };
+
         initialPassword = lib.mkOption {
           type = lib.types.str;
           default = "nixos";

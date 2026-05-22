@@ -6,10 +6,8 @@
 }:
 let
   cfg = config.my;
-  confDirectory = "${config.home.homeDirectory}/.config/hypr/conf";
-  confTargetDirectory = ".config/hypr/conf";
 
-  replacements = {
+  replacementRule = {
     "@hyprland-autoname-workspaces@" =
       "${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces";
     "@kitty@" = "${pkgs.kitty}/bin/kitty";
@@ -19,22 +17,17 @@ let
     "@zsh@" = "${pkgs.zsh}/bin/zsh";
   };
 
-  renderConf =
-    path:
-    lib.replaceStrings (lib.attrNames replacements) (lib.attrValues replacements) (
-      builtins.readFile path
-    );
+  replaceFrom = lib.foldlAttrs (
+    acc: from: _:
+    acc ++ [ from ]
+  ) [ ] replacementRule;
+  replaceTo = lib.foldlAttrs (
+    acc: _: to:
+    acc ++ [ to ]
+  ) [ ] replacementRule;
 
-  baseConfFiles = {
-    "00-env.conf" = ./00-env.conf;
-    "05-nvidia.conf" = null;
-    "10-input.conf" = ./10-input.conf;
-    "20-appearance.conf" = ./20-appearance.conf;
-    "30-autostart.conf" = ./30-autostart.conf;
-    "40-binds.conf" = ./40-binds.conf;
-  };
+  readWithReplacement = path: lib.replaceStrings replaceFrom replaceTo (builtins.readFile path);
 
-  sourceLine = name: "source = ${confDirectory}/${name}";
 in
 lib.mkMerge [
   {
@@ -53,23 +46,34 @@ lib.mkMerge [
         hyprland-autoname-workspaces
       ];
 
-      file = lib.mapAttrs' (
-        name: path:
-        lib.nameValuePair "${confTargetDirectory}/${name}" {
-          text = if path == null then lib.mkDefault "" else renderConf path;
-        }
-      ) baseConfFiles;
     };
 
     wayland.windowManager.hyprland = {
       enable = true;
       systemd.enable = true;
       xwayland.enable = true;
-      extraConfig = lib.concatStringsSep "\n" (map sourceLine (lib.attrNames baseConfFiles));
+      extraConfig = lib.mkMerge [
+        (lib.mkOrder 1000 (readWithReplacement ./00-env.conf))
+        (lib.mkOrder 1010 (readWithReplacement ./10-input.conf))
+        (lib.mkOrder 1020 (readWithReplacement ./20-appearance.conf))
+        (lib.mkOrder 1030 (readWithReplacement ./30-autostart.conf))
+        (lib.mkOrder 1040 (readWithReplacement ./40-binds.conf))
+      ];
     };
   }
-
   (lib.mkIf cfg.hasNvidiaGpu {
-    home.file."${confTargetDirectory}/05-nvidia.conf".text = renderConf ./05-nvidia.conf;
+    wayland.windowManager.hyprland.extraConfig = lib.mkOrder 1005 (
+      readWithReplacement ./05-nvidia.conf
+    );
+  })
+  (lib.mkIf (!cfg.isVm) {
+    wayland.windowManager.hyprland.extraConfig = lib.mkOrder 1039 (
+      readWithReplacement ./39-modkey.conf
+    );
+  })
+  (lib.mkIf cfg.isVm {
+    wayland.windowManager.hyprland.extraConfig = lib.mkOrder 1039 (
+      readWithReplacement ./39-modkey-vm.conf
+    );
   })
 ]
