@@ -85,6 +85,7 @@ in
 
   config.perSystem =
     {
+      pkgs,
       ...
     }:
     {
@@ -94,10 +95,20 @@ in
           nixosConfiguration = mkNixosFromHost {
             host = host;
           };
+          runVm = pkgs.writeShellApplication {
+            name = "run-${name}-vm";
+            text = ''
+              if [ -z "''${TMPDIR:-}" ] || [ ! -d "$TMPDIR" ]; then
+                export TMPDIR=/tmp
+              fi
+
+              exec ${nixosConfiguration.config.system.build.vm}/bin/run-${nixosConfiguration.config.networking.hostName}-vm "$@"
+            '';
+          };
         in
         lib.nameValuePair "${name}-vm" {
           type = "app";
-          program = "${nixosConfiguration.config.system.build.vm}/bin/run-${nixosConfiguration.config.networking.hostName}-vm";
+          program = "${runVm}/bin/run-${name}-vm";
         }
       ) config.my.hosts;
     };
