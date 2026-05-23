@@ -19,6 +19,11 @@ in
     networkmanager.enable = true;
   };
 
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+
   system.stateVersion = cfg.stateVersion;
 
   users.users."${cfg.username}" = {
