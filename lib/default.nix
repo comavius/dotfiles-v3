@@ -37,7 +37,7 @@ let
             config = {
               my = host;
 
-              disko = lib.mkIf (host.disko != null) host.disko;
+              disko = lib.mkIf (host.disk.configSource == "disko") (host.disk.disko);
 
               home-manager = {
                 useGlobalPkgs = true;
@@ -63,7 +63,13 @@ let
           }
         )
       ]
-      ++ host.modules;
+      ++ host.modules
+      ++ (
+        if host.disk.configSource == "hardware-configuration.nix" then
+          [ host.disk.hardware-configuration ]
+        else
+          [ ]
+      );
     };
 in
 {

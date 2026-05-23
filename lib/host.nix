@@ -51,10 +51,25 @@
           description = "Initial password for the primary user.";
         };
 
-        disko = lib.mkOption {
-          type = lib.types.nullOr lib.types.attrs;
-          default = null;
-          description = "Disko configuration for this host.";
+        disk = {
+          configSource = lib.mkOption {
+            type = lib.types.enum [
+              "disko"
+              "hardware-configuration.nix"
+            ];
+            default = "disko";
+            description = "Source used to configure disks in the NixOS system.";
+          };
+          hardware-configuration = lib.mkOption {
+            type = lib.types.nullOr lib.types.deferredModule;
+            default = null;
+            description = "Generated hardware-configuration.nix module for this host.";
+          };
+          disko = lib.mkOption {
+            type = lib.types.nullOr lib.types.attrs;
+            default = null;
+            description = "Disko configuration for this host.";
+          };
         };
 
         zramSwapSizeGiB = lib.mkOption {

@@ -5,7 +5,9 @@
   hasNvidiaGpu = false;
   zramSwapSizeGiB = 16;
 
-  disko.devices = {
+  disk.configSource = "hardware-configuration.nix";
+  disk.hardware-configuration = import ./maeriberry/hardware-configuration.nix;
+  disk.disko.devices = {
     disk.main = {
       type = "disk";
       device = "/dev/nvme0n1";
@@ -22,13 +24,6 @@
               mountOptions = [
                 "umask=0077"
               ];
-            };
-          };
-
-          swap = {
-            size = "16G";
-            content = {
-              type = "swap";
             };
           };
 
