@@ -49,6 +49,7 @@ window#waybar {
 #pulseaudio,
 #backlight,
 #tray,
+#custom-screen-recording,
 #clock {
   padding-left: 8px;
   padding-right: 8px;
@@ -121,6 +122,16 @@ window#waybar {
   animation-timing-function: linear;
   animation-iteration-count: infinite;
   animation-direction: alternate;
+}
+
+#custom-screen-recording.idle {
+  color: var(--theme-selected-bg-color);
+}
+
+#custom-screen-recording.recording {
+  color: var(--theme-base-color);
+  background-color: var(--error-color);
+  font-weight: bold;
 }
 
 #clock {

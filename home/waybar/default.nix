@@ -36,6 +36,20 @@ let
       ''
         node ${./postcss-waybar-style.js} ${styleSource} "$out"
       '';
+
+  screenRecordingStatus = pkgs.writeShellApplication {
+    name = "waybar-screen-recording-status";
+    runtimeInputs = [ pkgs.systemd ];
+    text = ''
+      unit="hypr-screen-record.service"
+
+      if systemctl --user is-active --quiet "$unit"; then
+        printf '{"text":"REC","class":"recording","tooltip":"Screen recording is running"}\n'
+      else
+        printf '{"text":"REC","class":"idle","tooltip":"Screen recording is stopped"}\n'
+      fi
+    '';
+  };
 in
 {
   stylix.targets.waybar.enable = false;
@@ -64,6 +78,7 @@ in
           "pulseaudio"
           "backlight"
           "tray"
+          "custom/screen-recording"
           "clock"
         ];
         "custom/menu" = {
@@ -171,6 +186,12 @@ in
         tray = {
           icon-size = 21;
           spacing = 5;
+        };
+        "custom/screen-recording" = {
+          exec = "${screenRecordingStatus}/bin/waybar-screen-recording-status";
+          interval = 1;
+          return-type = "json";
+          tooltip = true;
         };
         clock = {
           interval = 60;

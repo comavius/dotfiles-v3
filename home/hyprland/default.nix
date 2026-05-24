@@ -8,8 +8,16 @@ let
   cfg = config.my;
 
   autonameWorkspacesConfig = ./autoname-workspaces.toml;
+  hyprlandPkgs = pkgs.callPackage ./pkgs { };
+  inherit (hyprlandPkgs)
+    hyprScreenRecord
+    hyprScreenRecordService
+    hyprScreenshot
+    ;
 
   replacementRule = {
+    "@hypr-screen-record@" = "${hyprScreenRecord}/bin/hypr-screen-record";
+    "@hypr-screenshot@" = "${hyprScreenshot}/bin/hypr-screenshot";
     "@hyprland-autoname-workspaces@" =
       "${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces --config ${autonameWorkspacesConfig}";
     "@kitty@" = "${pkgs.kitty}/bin/kitty";
@@ -44,9 +52,27 @@ lib.mkMerge [
 
     home = {
       packages = with pkgs; [
+        hyprScreenRecord
+        hyprScreenRecordService
+        hyprScreenshot
         hyprland-autoname-workspaces
       ];
 
+    };
+
+    systemd.user.services.hypr-screen-record = {
+      Unit = {
+        Description = "Hyprland screen recorder";
+        After = [ "graphical-session.target" ];
+        PartOf = [ "graphical-session.target" ];
+      };
+      Service = {
+        Type = "simple";
+        ExecStart = "${hyprScreenRecordService}/bin/hypr-screen-record-service";
+        KillMode = "mixed";
+        Restart = "no";
+        TimeoutStopSec = "10s";
+      };
     };
 
     wayland.windowManager.hyprland = {
