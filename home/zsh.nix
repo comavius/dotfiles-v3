@@ -9,7 +9,7 @@
 
     oh-my-zsh = {
       enable = true;
-      theme = "rgm";
+      theme = "essembeh";
       plugins = [
         "git"
       ];
