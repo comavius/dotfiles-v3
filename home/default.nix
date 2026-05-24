@@ -10,6 +10,7 @@ in
   imports = [
     ./hyprland
     ./waybar
+    ./zsh.nix
     ./fcitx.nix
   ];
 
