@@ -8,5 +8,6 @@
     ./virtualisation.nix
     ./user.nix
     ./devtools.nix
+    ./locale.nix
   ];
 }

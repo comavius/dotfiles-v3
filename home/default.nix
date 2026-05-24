@@ -10,6 +10,7 @@ in
   imports = [
     ./hyprland
     ./waybar
+    ./fcitx.nix
   ];
 
   home = {
