@@ -46,6 +46,7 @@ lib.mkMerge [
 
     services.hypridle.enable = true;
     services.mako.enable = true;
+    services.mako.settings.default-timeout = 5000;
 
     programs.hyprlock.enable = true;
     programs.wlogout.enable = true;
