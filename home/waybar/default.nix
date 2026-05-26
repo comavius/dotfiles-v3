@@ -50,6 +50,9 @@ let
       fi
     '';
   };
+
+  waybarPkgs = pkgs.callPackage ./pkgs { };
+  inherit (waybarPkgs) waybarAudioControl;
 in
 {
   stylix.targets.waybar.enable = false;
@@ -173,7 +176,10 @@ in
               "󰕾"
             ];
           };
-          tooltip-format = "{volume}%";
+          tooltip-format = "Volume: {volume}%\nLeft: output selector\nRight: mixer\nMiddle: restart audio";
+          on-click = "${waybarAudioControl}/bin/waybar-audio-control";
+          on-click-right = "${pkgs.pavucontrol}/bin/pavucontrol";
+          on-click-middle = "${waybarAudioControl}/bin/waybar-audio-control restart";
         };
         backlight = {
           format = "{icon} {percent}%";
@@ -208,5 +214,7 @@ in
   home.packages = with pkgs; [
     adwaita-icon-theme
     papirus-icon-theme
+    pavucontrol
+    waybarAudioControl
   ];
 }
