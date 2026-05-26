@@ -21,6 +21,7 @@ let
     "@hypr-screen-record@" = "${hyprScreenRecord}/bin/hypr-screen-record";
     "@hypr-screenshot@" = "${hyprScreenshot}/bin/hypr-screenshot";
     "@kitty@" = "${pkgs.kitty}/bin/kitty";
+    "@fastfetch@" = "${pkgs.fastfetch}/bin/fastfetch";
     "@wofi@" = "${pkgs.wofi}/bin/wofi";
     "@zsh@" = "${pkgs.zsh}/bin/zsh";
   };
