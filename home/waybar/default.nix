@@ -59,6 +59,7 @@ in
 
   programs.waybar = {
     enable = true;
+    systemd.enable = true;
     settings = {
       mainBar = {
         layer = "top";
@@ -92,7 +93,18 @@ in
         "hyprland/workspaces" = {
           format = "{name}";
           persistent-workspaces = {
-            "*" = 10;
+            "*" = [
+              1
+              2
+              3
+              4
+              5
+              6
+              7
+              8
+              9
+              10
+            ];
           };
         };
         "hyprland/window" = {

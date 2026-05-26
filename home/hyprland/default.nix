@@ -8,6 +8,8 @@ let
   cfg = config.my;
 
   autonameWorkspacesConfig = ./autoname-workspaces.toml;
+  hyprlandSessionTarget = config.wayland.systemd.target;
+  hyprlandAutonameWorkspacesCommand = "${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces --config ${autonameWorkspacesConfig}";
   hyprlandPkgs = pkgs.callPackage ./pkgs { };
   inherit (hyprlandPkgs)
     hyprScreenRecord
@@ -18,11 +20,7 @@ let
   replacementRule = {
     "@hypr-screen-record@" = "${hyprScreenRecord}/bin/hypr-screen-record";
     "@hypr-screenshot@" = "${hyprScreenshot}/bin/hypr-screenshot";
-    "@hyprland-autoname-workspaces@" =
-      "${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces --config ${autonameWorkspacesConfig}";
     "@kitty@" = "${pkgs.kitty}/bin/kitty";
-    "@mako@" = "${pkgs.mako}/bin/mako";
-    "@waybar@" = "${pkgs.waybar}/bin/waybar";
     "@wofi@" = "${pkgs.wofi}/bin/wofi";
     "@zsh@" = "${pkgs.zsh}/bin/zsh";
   };
@@ -74,6 +72,37 @@ lib.mkMerge [
         Restart = "no";
         TimeoutStopSec = "10s";
       };
+    };
+
+    systemd.user.services.mako = {
+      Unit = {
+        Description = "Lightweight Wayland notification daemon";
+        Documentation = "man:mako(1)";
+        After = [ hyprlandSessionTarget ];
+        PartOf = [ hyprlandSessionTarget ];
+        ConditionEnvironment = "WAYLAND_DISPLAY";
+      };
+      Service = {
+        Type = "simple";
+        ExecStart = "${pkgs.mako}/bin/mako";
+        Restart = "on-failure";
+      };
+      Install.WantedBy = [ hyprlandSessionTarget ];
+    };
+
+    systemd.user.services.hyprland-autoname-workspaces = {
+      Unit = {
+        Description = "Automatically rename Hyprland workspaces";
+        After = [ hyprlandSessionTarget ];
+        PartOf = [ hyprlandSessionTarget ];
+        ConditionEnvironment = "WAYLAND_DISPLAY";
+      };
+      Service = {
+        Type = "simple";
+        ExecStart = hyprlandAutonameWorkspacesCommand;
+        Restart = "on-failure";
+      };
+      Install.WantedBy = [ hyprlandSessionTarget ];
     };
 
     wayland.windowManager.hyprland = {

@@ -2,7 +2,7 @@ version = "1.1.16"
 
 [format]
 dedup = true
-dedup_inactive_fullscreen = false
+dedup_inactive_fullscreen = true
 delim = " "
 client = "{icon}{delim}"
 client_active = "{icon}{delim}"
@@ -17,8 +17,8 @@ DEFAULT = ""
 "(?i)kitty" = ""
 "(?i)firefox" = ""
 "(?i)chromium" = ""
-"(?i)code" = ""
-"(?i)discord" = ""
+"(?i)code" = ""
+"(?i)discord" = ""
 "(?i)nemo" = ""
 "(?i)obsidian" = "󰠮"
 "(?i)org.telegram.desktop" = ""

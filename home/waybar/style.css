@@ -56,7 +56,7 @@ window#waybar {
 }
 
 #custom-menu,
-#workspaces button.active,
+#workspaces button.active.hosting-monitor,
 #clock {
   color: var(--theme-bg-color);
   background-color: var(--theme-selected-bg-color);
@@ -75,8 +75,16 @@ window#waybar {
   color: var(--theme-selected-bg-color);
 }
 
-#workspaces button.active {
-  border-color: var(--theme-selected-bg-color);
+#workspaces button.hosting-monitor {
+  border-color: var(--theme-text-color);
+  color: var(--theme-text-color);
+  font-weight: 700;
+}
+
+#workspaces button.active.hosting-monitor {
+  color: var(--theme-bg-color);
+  background-color: var(--theme-selected-bg-color);
+  font-weight: 700;
 }
 
 #workspaces button.urgent {
