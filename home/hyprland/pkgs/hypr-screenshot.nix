@@ -34,7 +34,7 @@ writeShellApplication {
     output="$screenshot_dir/screenshot-$(date +%Y%m%d-%H%M%S).png"
 
     if [ "''${1:-}" = "area" ]; then
-      selection=$(slurp) || exit 0
+      selection=$(slurp -o -f '%x,%y %wx%h') || exit 0
       grim -g "$selection" "$output"
     else
       grim "$output"

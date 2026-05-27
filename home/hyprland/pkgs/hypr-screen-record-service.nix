@@ -28,6 +28,7 @@ writeShellApplication {
 
     state_dir="''${XDG_RUNTIME_DIR:?XDG_RUNTIME_DIR is not set}/hypr-screen-record"
     geometry_file="$state_dir/geometry"
+    output_name_file="$state_dir/output-name"
     output_file="$state_dir/output"
 
     if [ ! -e "$geometry_file" ] || [ ! -s "$output_file" ]; then
@@ -36,6 +37,10 @@ writeShellApplication {
     fi
 
     geometry=$(cat "$geometry_file")
+    record_output=""
+    if [ -e "$output_name_file" ]; then
+      record_output=$(cat "$output_name_file")
+    fi
     output=$(cat "$output_file")
     recorder_pid=""
 
@@ -51,11 +56,14 @@ writeShellApplication {
     }
 
     notify-send "Screen recording started"
+    recorder_args=(-f "$output")
     if [ -n "$geometry" ]; then
-      wf-recorder -g "$geometry" -f "$output" &
-    else
-      wf-recorder -f "$output" &
+      recorder_args=(-g "$geometry" "''${recorder_args[@]}")
     fi
+    if [ -n "$record_output" ]; then
+      recorder_args=(-o "$record_output" "''${recorder_args[@]}")
+    fi
+    wf-recorder "''${recorder_args[@]}" &
     recorder_pid="$!"
 
     trap stop_recording INT TERM
