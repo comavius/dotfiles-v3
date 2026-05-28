@@ -3,7 +3,6 @@
   username = "comavius";
   hostname = "maeriberry";
   hasNvidiaGpu = false;
-  zramSwapSizeGiB = 16;
 
   disk.configSource = "hardware-configuration.nix";
   disk.hardware-configuration = import ./maeriberry/hardware-configuration.nix;
