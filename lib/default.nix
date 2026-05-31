@@ -13,6 +13,9 @@ let
 
   mkNixosFromHost =
     { host }:
+    let
+      hasDiskoConfig = host.disk.configSource == "disko" && host.disk.disko != null;
+    in
     inputs.nixpkgs.lib.nixosSystem {
       inherit (host) system;
       specialArgs = {
@@ -22,7 +25,6 @@ let
         {
           nixpkgs.config = nixpkgsConfig;
         }
-        inputs.disko.nixosModules.disko
         inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager
         ../nixos
@@ -36,9 +38,6 @@ let
 
             config = {
               my = host;
-
-              disko = lib.mkIf (host.disk.configSource == "disko") (host.disk.disko);
-
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
@@ -59,10 +58,14 @@ let
                   ++ host.homeModules;
                 };
               };
+            }
+            // lib.optionalAttrs hasDiskoConfig {
+              disko = host.disk.disko;
             };
           }
         )
       ]
+      ++ (if hasDiskoConfig then [ inputs.disko.nixosModules.disko ] else [ ])
       ++ host.modules
       ++ (
         if host.disk.configSource == "hardware-configuration.nix" then
