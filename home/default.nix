@@ -119,6 +119,9 @@ in
     discord
     google-chrome
     (pkgs.callPackage ./../pkgs/sh4der-jockey.nix { })
+    blender
+    gimp
+    unzip
   ];
 
   xdg.mimeApps = {
