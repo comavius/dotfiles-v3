@@ -122,6 +122,7 @@ in
     blender
     gimp
     unzip
+    ffmpeg-full
   ];
 
   xdg.mimeApps = {
