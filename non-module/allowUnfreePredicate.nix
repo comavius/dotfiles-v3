@@ -5,6 +5,7 @@ let
     "google-chrome"
     "steam"
     "steam-unwrapped"
+    "ndi"
   ];
   allowedUnfreePackagePrefixes = [
     "cuda-"

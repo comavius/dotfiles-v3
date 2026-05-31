@@ -118,6 +118,7 @@ in
     vscode
     discord
     google-chrome
+    (pkgs.callPackage ./../pkgs/sh4der-jockey.nix { })
   ];
 
   xdg.mimeApps = {
