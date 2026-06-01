@@ -13,7 +13,7 @@ in
     enable = true;
     settings.default_session = {
       user = username;
-      command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd ${pkgs.hyprland}/bin/Hyprland";
+      command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd ${pkgs.hyprland}/bin/start-hyprland";
     };
   };
 

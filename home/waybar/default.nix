@@ -31,7 +31,7 @@ let
     pkgs.runCommand "waybar-style.css"
       {
         nativeBuildInputs = [ pkgs.nodejs ];
-        NODE_PATH = "${pkgs.nodePackages.postcss}/lib/node_modules";
+        NODE_PATH = "${pkgs.postcss}/lib/node_modules";
       }
       ''
         node ${./postcss-waybar-style.js} ${styleSource} "$out"

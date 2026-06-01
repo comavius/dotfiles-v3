@@ -108,6 +108,7 @@ lib.mkMerge [
 
     wayland.windowManager.hyprland = {
       enable = true;
+      configType = "hyprlang";
       systemd.enable = true;
       xwayland.enable = true;
       extraConfig = lib.mkMerge [
@@ -118,6 +119,8 @@ lib.mkMerge [
         (lib.mkOrder 1040 (readWithReplacement ./40-binds.conf))
       ];
     };
+
+    xdg.configFile."hypr/hyprland.conf".force = true;
   }
   (lib.mkIf cfg.hasNvidiaGpu {
     wayland.windowManager.hyprland.extraConfig = lib.mkOrder 1005 (
