@@ -123,6 +123,7 @@ in
     gimp
     unzip
     ffmpeg-full
+    bubblewrap
   ];
 
   xdg.mimeApps = {
