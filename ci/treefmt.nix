@@ -34,16 +34,5 @@
           TREEFMT_CONFIG_FILE = config.treefmt.build.configFile;
         };
       };
-      packages."ci:treefmt:check" = pkgs.writeShellApplication {
-        name = "treefmt-check";
-        text = ''
-          echo "Checking formatting ..." >&2
-          treefmt --ci --config-file "$TREEFMT_CONFIG_FILE"
-        '';
-        runtimeInputs = with pkgs; [ treefmt ];
-        runtimeEnv = {
-          TREEFMT_CONFIG_FILE = config.treefmt.build.configFile;
-        };
-      };
     };
 }
