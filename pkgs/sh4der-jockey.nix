@@ -3,6 +3,8 @@
   rustPlatform,
   fetchFromGitHub,
   makeWrapper,
+  makeDesktopItem,
+  copyDesktopItems,
   pkg-config,
   alsa-lib,
   gtk3,
@@ -51,6 +53,7 @@ rustPlatform.buildRustPackage rec {
 
   nativeBuildInputs = [
     makeWrapper
+    copyDesktopItems
     pkg-config
   ];
 
@@ -84,6 +87,21 @@ rustPlatform.buildRustPackage rec {
       }" \
       --run 'if [ -n "''${DISPLAY:-}" ] && [ -z "''${WINIT_UNIX_BACKEND:-}" ]; then export WINIT_UNIX_BACKEND=x11; fi'
   '';
+
+  desktopItems = [
+    (makeDesktopItem {
+      name = "sh4der-jockey";
+      desktopName = "sh4der-jockey";
+      genericName = "Shader coding tool";
+      comment = meta.description;
+      exec = "sh4der-jockey";
+      terminal = false;
+      categories = [
+        "AudioVideo"
+        "Graphics"
+      ];
+    })
+  ];
 
   meta = {
     description = "A tool for shader coding and live performances";
