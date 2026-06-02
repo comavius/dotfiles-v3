@@ -49,6 +49,7 @@ window#waybar {
 #pulseaudio,
 #backlight,
 #tray,
+#custom-nixos-configuration,
 #custom-screen-recording,
 #clock {
   padding-left: 8px;
@@ -107,6 +108,17 @@ window#waybar {
 #bluetooth.disabled,
 #pulseaudio.muted,
 #battery.warning {
+  color: var(--warning-color);
+}
+
+#custom-nixos-configuration.current,
+#custom-nixos-configuration.ahead {
+  color: var(--theme-selected-bg-color);
+}
+
+#custom-nixos-configuration.behind,
+#custom-nixos-configuration.diverged,
+#custom-nixos-configuration.unknown {
   color: var(--warning-color);
 }
 

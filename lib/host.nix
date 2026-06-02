@@ -21,6 +21,11 @@
           description = "Home directory for the primary user.";
         };
 
+        dotfilesRepositoryPath = lib.mkOption {
+          type = lib.types.str;
+          description = "Local path to this dotfiles repository.";
+        };
+
         hostname = lib.mkOption {
           type = lib.types.str;
           default = name;

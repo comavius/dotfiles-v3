@@ -1,7 +1,11 @@
-{ ... }:
+{ config, ... }:
+let
+  homeDirectory = config.homeDirectory;
+in
 {
   username = "comavius";
   hostname = "maeriberry";
+  dotfilesRepositoryPath = "${homeDirectory}/projects/dotfiles-v3";
   hasNvidiaGpu = false;
 
   disk.configSource = "hardware-configuration.nix";
