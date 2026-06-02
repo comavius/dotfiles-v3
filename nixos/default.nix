@@ -9,5 +9,6 @@
     ./user.nix
     ./devtools.nix
     ./locale.nix
+    ./printing.nix
   ];
 }
