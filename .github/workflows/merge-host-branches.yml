@@ -14,8 +14,97 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  prepare-merge:
+    name: Prepare host branch merge
+    runs-on: ubuntu-latest
+    outputs:
+      configurations: ${{ steps.configurations.outputs.configurations }}
+      integration-branch: ${{ steps.integration-branch.outputs.name }}
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create integration branch
+        id: integration-branch
+        run: |
+          source_name="$(printf "%s" "${GITHUB_REF_NAME}" | tr "/" "-")"
+          integration_branch="automation/merge-host-${source_name}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+          echo "name=${integration_branch}" >> "${GITHUB_OUTPUT}"
+
+          git fetch origin "+refs/heads/${GITHUB_REF_NAME}:refs/remotes/origin/${GITHUB_REF_NAME}"
+          git switch -c "${integration_branch}"
+          git merge --no-edit "origin/${GITHUB_REF_NAME}"
+
+      - name: Build jq
+        run: nix build nixpkgs#jq --out-link .jq
+
+      - name: List NixOS configurations
+        id: configurations
+        run: |
+          set -o pipefail
+
+          configurations="$(
+            nix flake show --json \
+              | ./.jq/bin/jq -c '.nixosConfigurations // {} | keys'
+          )"
+
+          test "${configurations}" != "[]"
+          echo "configurations=${configurations}" >> "${GITHUB_OUTPUT}"
+
+      - name: Push integration branch
+        env:
+          INTEGRATION_BRANCH: ${{ steps.integration-branch.outputs.name }}
+        run: git push origin HEAD:"${INTEGRATION_BRANCH}"
+
+  dry-build:
+    name: Dry-build ${{ matrix.configuration }}
+    needs: prepare-merge
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: ${{ fromJSON(needs.prepare-merge.outputs.configurations) }}
+
+    steps:
+      - name: Checkout integration branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare-merge.outputs.integration-branch }}
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Build nixos-rebuild command
+        run: nix build nixpkgs#nixos-rebuild --out-link .nixos-rebuild
+
+      - name: Dry-build NixOS configuration
+        run: ./.nixos-rebuild/bin/nixos-rebuild dry-build --flake ".#${{ matrix.configuration }}"
+
   merge-to-main:
-    name: Merge host branch to main
+    name: Merge to main
+    needs:
+      - prepare-merge
+      - dry-build
     runs-on: ubuntu-latest
 
     steps:
@@ -25,11 +114,38 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Merge pushed host branch
+      - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git fetch origin "+refs/heads/${GITHUB_REF_NAME}:refs/remotes/origin/${GITHUB_REF_NAME}"
-          git merge --no-edit "origin/${GITHUB_REF_NAME}"
+      - name: Merge integration branch
+        env:
+          INTEGRATION_BRANCH: ${{ needs.prepare-merge.outputs.integration-branch }}
+        run: |
+          git fetch origin "+refs/heads/main:refs/remotes/origin/main"
+          git fetch origin "+refs/heads/${INTEGRATION_BRANCH}:refs/remotes/origin/${INTEGRATION_BRANCH}"
+          git merge --ff-only origin/main
+          git merge --no-edit "origin/${INTEGRATION_BRANCH}"
           git push origin HEAD:main
+
+  delete-integration-branch:
+    name: Delete integration branch
+    needs:
+      - prepare-merge
+      - dry-build
+      - merge-to-main
+    if: always() && needs.prepare-merge.outputs.integration-branch != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Delete integration branch
+        env:
+          INTEGRATION_BRANCH: ${{ needs.prepare-merge.outputs.integration-branch }}
+        run: git push origin --delete "${INTEGRATION_BRANCH}" || true

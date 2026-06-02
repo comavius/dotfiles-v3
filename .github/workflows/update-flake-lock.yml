@@ -13,9 +13,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  update-flake-lock:
-    name: Update flake.lock and merge to main
+  prepare-update:
+    name: Prepare flake.lock update
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.changes.outputs.changed }}
+      configurations: ${{ steps.configurations.outputs.configurations }}
+      update-branch: ${{ steps.update-branch.outputs.name }}
 
     steps:
       - name: Checkout main
@@ -30,32 +34,136 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
 
-      - name: Update flake.lock
+      - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+      - name: Create update branch
+        id: update-branch
+        run: |
           timestamp="$(date -u +%Y%m%d%H%M%S)"
           update_branch="automation/update-flake-lock-${timestamp}"
+
+          echo "name=${update_branch}" >> "${GITHUB_OUTPUT}"
 
           git pull --ff-only origin main
           git switch -c "${update_branch}"
 
-          nix flake update
+      - name: Update flake.lock
+        run: nix flake update
 
+      - name: Build jq
+        run: nix build nixpkgs#jq --out-link .jq
+
+      - name: List NixOS configurations
+        id: configurations
+        run: |
+          set -o pipefail
+
+          configurations="$(
+            nix flake show --json \
+              | ./.jq/bin/jq -c '.nixosConfigurations // {} | keys'
+          )"
+
+          test "${configurations}" != "[]"
+          echo "configurations=${configurations}" >> "${GITHUB_OUTPUT}"
+
+      - name: Check for flake.lock changes
+        id: changes
+        run: |
           if git diff --quiet -- flake.lock; then
             echo "flake.lock is already up to date."
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
 
+          echo "changed=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Commit flake.lock update
+        if: steps.changes.outputs.changed == 'true'
+        run: |
           git add flake.lock
           git commit -m "Update flake.lock"
-          git push origin HEAD:"${update_branch}"
 
+      - name: Push update branch
+        run: git push origin HEAD:"${{ steps.update-branch.outputs.name }}"
+
+  dry-build:
+    name: Dry-build ${{ matrix.configuration }}
+    needs: prepare-update
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: ${{ fromJSON(needs.prepare-update.outputs.configurations) }}
+
+    steps:
+      - name: Checkout update branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare-update.outputs.update-branch }}
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Build nixos-rebuild command
+        run: nix build nixpkgs#nixos-rebuild --out-link .nixos-rebuild
+
+      - name: Dry-build NixOS configuration
+        run: ./.nixos-rebuild/bin/nixos-rebuild dry-build --flake ".#${{ matrix.configuration }}"
+
+  merge-to-main:
+    name: Merge to main
+    needs:
+      - prepare-update
+      - dry-build
+    if: needs.prepare-update.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge update branch
+        env:
+          UPDATE_BRANCH: ${{ needs.prepare-update.outputs.update-branch }}
+        run: |
           git fetch origin "+refs/heads/main:refs/remotes/origin/main"
-          git switch main
+          git fetch origin "+refs/heads/${UPDATE_BRANCH}:refs/remotes/origin/${UPDATE_BRANCH}"
           git merge --ff-only origin/main
-          git merge --no-edit "${update_branch}"
+          git merge --no-edit "origin/${UPDATE_BRANCH}"
           git push origin HEAD:main
-          git push origin --delete "${update_branch}"
-          git branch -d "${update_branch}"
+
+  delete-update-branch:
+    name: Delete update branch
+    needs:
+      - prepare-update
+      - dry-build
+      - merge-to-main
+    if: always() && needs.prepare-update.outputs.update-branch != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Delete update branch
+        env:
+          UPDATE_BRANCH: ${{ needs.prepare-update.outputs.update-branch }}
+        run: git push origin --delete "${UPDATE_BRANCH}" || true
