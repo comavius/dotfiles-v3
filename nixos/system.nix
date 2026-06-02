@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -57,7 +58,10 @@ in
     "flakes"
   ];
 
-  system.stateVersion = cfg.stateVersion;
+  system = {
+    configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
+    stateVersion = cfg.stateVersion;
+  };
 
   users.users."${cfg.username}" = {
     initialPassword = cfg.initialPassword;
