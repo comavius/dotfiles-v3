@@ -84,11 +84,13 @@ jobs:
           git commit -m "Update flake.lock"
 
       - name: Push update branch
+        if: steps.changes.outputs.changed == 'true'
         run: git push origin HEAD:"${{ steps.update-branch.outputs.name }}"
 
   dry-build:
     name: Dry-build ${{ matrix.configuration }}
     needs: prepare-update
+    if: needs.prepare-update.outputs.changed == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
