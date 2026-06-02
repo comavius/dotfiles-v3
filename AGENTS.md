@@ -6,6 +6,7 @@
 ```
 nix fmt
 ```
+If you changed some `.nix` files, run the following command to check if the configuration is valid.
 ```
 nixos-rebuild build --flake ".#<curent-hostname>"
 ```
