@@ -5,6 +5,7 @@
   ...
 }:
 let
+  cfg = config.my;
   colors = config.lib.stylix.colors.withHashtag;
   styleSource = pkgs.writeText "waybar-style-source.css" (
     lib.replaceStrings
@@ -51,8 +52,13 @@ let
     '';
   };
 
-  waybarPkgs = pkgs.callPackage ./pkgs { };
-  inherit (waybarPkgs) waybarAudioControl;
+  waybarPkgs = pkgs.callPackage ./pkgs {
+    inherit (cfg) dotfilesRepositoryPath;
+  };
+  inherit (waybarPkgs)
+    waybarAudioControl
+    waybarNixosConfigurationStatus
+    ;
 in
 {
   stylix.targets.waybar.enable = false;
@@ -82,6 +88,7 @@ in
           "pulseaudio"
           "backlight"
           "tray"
+          "custom/nixos-configuration"
           "custom/screen-recording"
           "clock"
         ];
@@ -208,6 +215,12 @@ in
         "custom/screen-recording" = {
           exec = "${screenRecordingStatus}/bin/waybar-screen-recording-status";
           interval = 1;
+          return-type = "json";
+          tooltip = true;
+        };
+        "custom/nixos-configuration" = {
+          exec = "${waybarNixosConfigurationStatus}/bin/waybar-nixos-configuration-status";
+          interval = 300;
           return-type = "json";
           tooltip = true;
         };
