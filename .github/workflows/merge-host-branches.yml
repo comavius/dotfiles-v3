@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: merge-host-branches
+  group: main-updates
   cancel-in-progress: false
 
 jobs:

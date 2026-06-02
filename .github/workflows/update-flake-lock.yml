@@ -1,0 +1,59 @@
+name: Update flake.lock
+
+on:
+  schedule:
+    - cron: "0 18 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: main-updates
+  cancel-in-progress: false
+
+jobs:
+  update-flake-lock:
+    name: Update flake.lock and merge to main
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Update flake.lock
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          update_branch="automation/update-flake-lock"
+
+          git fetch origin "+refs/heads/${update_branch}:refs/remotes/origin/${update_branch}" || true
+          git pull --ff-only origin main
+          git switch -C "${update_branch}"
+
+          nix flake update
+
+          if git diff --quiet -- flake.lock; then
+            echo "flake.lock is already up to date."
+            exit 0
+          fi
+
+          git add flake.lock
+          git commit -m "Update flake.lock"
+          git push --force-with-lease origin HEAD:"${update_branch}"
+
+          git fetch origin "+refs/heads/main:refs/remotes/origin/main"
+          git switch main
+          git merge --ff-only origin/main
+          git merge --no-edit "${update_branch}"
+          git push origin HEAD:main
