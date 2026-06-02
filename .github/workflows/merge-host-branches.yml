@@ -51,17 +51,14 @@ jobs:
           git switch -c "${integration_branch}"
           git merge --no-edit "origin/${GITHUB_REF_NAME}"
 
-      - name: Build jq
-        run: nix build nixpkgs#jq --out-link .jq
-
       - name: List NixOS configurations
         id: configurations
         run: |
-          set -o pipefail
+          nix flake show --json > flake-show.json
 
           configurations="$(
-            nix flake show --json \
-              | ./.jq/bin/jq -c '.nixosConfigurations // {} | keys'
+            nix shell nixpkgs#jq -c jq -c '.nixosConfigurations // {} | keys' \
+              < flake-show.json
           )"
 
           test "${configurations}" != "[]"
