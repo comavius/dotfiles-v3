@@ -35,11 +35,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          update_branch="automation/update-flake-lock"
+          timestamp="$(date -u +%Y%m%d%H%M%S)"
+          update_branch="automation/update-flake-lock-${timestamp}"
 
-          git fetch origin "+refs/heads/${update_branch}:refs/remotes/origin/${update_branch}" || true
           git pull --ff-only origin main
-          git switch -C "${update_branch}"
+          git switch -c "${update_branch}"
 
           nix flake update
 
@@ -50,10 +50,12 @@ jobs:
 
           git add flake.lock
           git commit -m "Update flake.lock"
-          git push --force-with-lease origin HEAD:"${update_branch}"
+          git push origin HEAD:"${update_branch}"
 
           git fetch origin "+refs/heads/main:refs/remotes/origin/main"
           git switch main
           git merge --ff-only origin/main
           git merge --no-edit "${update_branch}"
           git push origin HEAD:main
+          git push origin --delete "${update_branch}"
+          git branch -d "${update_branch}"
