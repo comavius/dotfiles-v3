@@ -155,6 +155,7 @@ in
     unzip
     ffmpeg-full
     bubblewrap
+    gof5
   ];
 
   xdg.mimeApps = {
