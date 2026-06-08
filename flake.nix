@@ -6,9 +6,7 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     home-manager.url = "github:nix-community/home-manager/release-26.05";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-    # Stylix channel is temporarily locked to master.
-    # It should be replaced to release-26.05 immediately after it is pushed.
-    stylix.url = "github:nix-community/stylix/master";
+    stylix.url = "github:nix-community/stylix/release-26.05";
     treefmt-nix.url = "github:numtide/treefmt-nix";
 
     disko.inputs.nixpkgs.follows = "nixpkgs";
