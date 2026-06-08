@@ -4,6 +4,7 @@
 
     coreutils-full
     git
+    git-lfs
     gcc
     clang
   ];
