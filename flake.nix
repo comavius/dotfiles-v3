@@ -13,6 +13,9 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     stylix.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
+
+    rust-overlay.url = "github:oxalica/rust-overlay";
+    rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -26,6 +29,7 @@
         ./flake
         ./lib
         ./hosts
+        ./home-devshells
       ];
     };
 }

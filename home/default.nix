@@ -1,4 +1,5 @@
 {
+  inputs,
   pkgs,
   config,
   lib,
@@ -29,6 +30,7 @@ in
     ./home-packages.nix
     ./xdg.nix
   ];
+  nix.registry.dots.flake = inputs.self;
 
   home = {
     username = cfg.username;
