@@ -29,5 +29,6 @@
     bubblewrap
     gof5
     typst
+    tinymist
   ];
 }
