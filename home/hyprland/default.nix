@@ -16,6 +16,10 @@ let
     hyprScreenRecordService
     hyprScreenshot
     ;
+  lockCommand = "${pkgs.procps}/bin/pidof hyprlock || ${pkgs.hyprlock}/bin/hyprlock";
+  loginctl = "${pkgs.systemd}/bin/loginctl";
+  systemctl = "${pkgs.systemd}/bin/systemctl";
+  hyprctl = "${pkgs.hyprland}/bin/hyprctl";
 
   replacementRule = {
     "@hypr-screen-record@" = "${hyprScreenRecord}/bin/hypr-screen-record";
@@ -40,10 +44,40 @@ let
 in
 lib.mkMerge [
   {
+    wayland.systemd.target = "hyprland-session.target";
+
     programs.kitty.enable = true;
     programs.wofi.enable = true;
 
-    services.hypridle.enable = true;
+    services.hypridle = {
+      enable = true;
+      systemdTarget = hyprlandSessionTarget;
+      settings = {
+        general = {
+          lock_cmd = lockCommand;
+          before_sleep_cmd = "${loginctl} lock-session";
+          after_sleep_cmd = "${hyprctl} dispatch dpms on";
+        };
+        listener = [
+          {
+            timeout = 300;
+            "on-timeout" = "${loginctl} lock-session";
+          }
+          {
+            timeout = 330;
+            "on-timeout" = "${hyprctl} dispatch dpms off";
+            "on-resume" = "${hyprctl} dispatch dpms on";
+          }
+          {
+            timeout = 900;
+            "on-timeout" = "${systemctl} suspend";
+          }
+        ];
+      };
+    };
+    systemd.user.services.hypridle.Service.ExecStart = lib.mkForce (
+      "${pkgs.hypridle}/bin/hypridle --config ${config.xdg.configFile."hypr/hypridle.conf".source}"
+    );
     services.mako.enable = true;
     services.mako.settings.default-timeout = 5000;
 
