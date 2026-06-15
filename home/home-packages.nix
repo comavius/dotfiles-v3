@@ -30,5 +30,6 @@
     gof5
     typst
     tinymist
+    tailscale
   ];
 }
