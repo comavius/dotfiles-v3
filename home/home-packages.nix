@@ -28,5 +28,6 @@
     ffmpeg-full
     bubblewrap
     gof5
+    typst
   ];
 }
