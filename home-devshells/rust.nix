@@ -9,11 +9,10 @@
       };
     in
     {
-      devShells.rust-dev = pkgs.mkShell {
-        name = "rust-dev";
-
-        packages = [
-          pkgs.rust-bin.stable.latest.default
+      packages.rust-dev = pkgs.rust-bin.stable.latest.default.override {
+        extensions = [
+          "rustfmt"
+          "rust-src"
         ];
       };
     };
