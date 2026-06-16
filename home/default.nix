@@ -29,6 +29,7 @@ in
     ./fcitx.nix
     ./home-packages.nix
     ./xdg.nix
+    ./codex.nix
   ];
   nix.registry.dots.flake = inputs.self;
 

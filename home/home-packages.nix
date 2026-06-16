@@ -30,6 +30,7 @@
     gof5
     typst
     tinymist
-    tailscale
+    codex
+    gh
   ];
 }
