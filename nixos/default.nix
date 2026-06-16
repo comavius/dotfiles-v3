@@ -10,5 +10,6 @@
     ./devtools.nix
     ./locale.nix
     ./printing.nix
+    ./network.nix
   ];
 }
