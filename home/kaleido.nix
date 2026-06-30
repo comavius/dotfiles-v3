@@ -31,8 +31,8 @@ in
         "--"
         (lib.getExe' kaleido "kaleido")
         "hex-flip"
-        colors.base01
         colors.base04
+        colors.base05
       ];
       Environment = [ "WINIT_UNIX_BACKEND=wayland" ];
       Restart = "on-failure";
