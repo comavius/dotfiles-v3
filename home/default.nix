@@ -28,6 +28,7 @@ in
     ./zsh.nix
     ./fcitx.nix
     ./home-packages.nix
+    ./kaleido.nix
     ./xdg.nix
     ./codex.nix
   ];
