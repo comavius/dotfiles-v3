@@ -238,17 +238,17 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1782827699,
-        "narHash": "sha256-L0QYNVae57dUH1hLXa1GEpo/Oh8jzQEAOAJ/f+xnFqM=",
-        "ref": "refs/heads/main",
-        "rev": "a25008698def55cc41751133653f778ddd6db7d4",
-        "revCount": 8,
-        "type": "git",
-        "url": "ssh://git@github.com/comavius/kaleido.git"
+        "lastModified": 1782840396,
+        "narHash": "sha256-05JQBc0i5V38UPE/+h5MxDN/VfbXE7pUtUa8bR5Asu0=",
+        "owner": "comavius",
+        "repo": "kaleido",
+        "rev": "83bd04dd6ebfa8f5c865f504247171c3d0e31e8e",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/comavius/kaleido.git"
+        "owner": "comavius",
+        "repo": "kaleido",
+        "type": "github"
       }
     },
     "nixpkgs": {

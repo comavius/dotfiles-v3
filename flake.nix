@@ -8,7 +8,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     stylix.url = "github:nix-community/stylix/release-26.05";
     treefmt-nix.url = "github:numtide/treefmt-nix";
-    kaleido.url = "git+ssh://git@github.com/comavius/kaleido.git";
+    kaleido.url = "github:comavius/kaleido";
 
     disko.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
