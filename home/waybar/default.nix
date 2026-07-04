@@ -58,6 +58,7 @@ let
   inherit (waybarPkgs)
     waybarAudioControl
     waybarNixosConfigurationStatus
+    waybarWeylusControl
     ;
 in
 {
@@ -88,6 +89,7 @@ in
           "pulseaudio"
           "backlight"
           "tray"
+          "custom/weylus"
           "custom/nixos-configuration"
           "custom/screen-recording"
           "clock"
@@ -212,6 +214,13 @@ in
           icon-size = 21;
           spacing = 5;
         };
+        "custom/weylus" = {
+          exec = "${waybarWeylusControl}/bin/waybar-weylus-control";
+          interval = 2;
+          return-type = "json";
+          tooltip = true;
+          on-click = "${waybarWeylusControl}/bin/waybar-weylus-control toggle";
+        };
         "custom/screen-recording" = {
           exec = "${screenRecordingStatus}/bin/waybar-screen-recording-status";
           interval = 1;
@@ -241,5 +250,6 @@ in
     papirus-icon-theme
     pavucontrol
     waybarAudioControl
+    waybarWeylusControl
   ];
 }

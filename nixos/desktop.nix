@@ -5,6 +5,7 @@
 }:
 let
   username = config.my.username;
+  weylus = pkgs.callPackage ../pkgs/weylus.nix { };
 in
 {
   services.xserver.enable = false;
@@ -25,6 +26,13 @@ in
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
+  };
+
+  programs.weylus = {
+    enable = true;
+    openFirewall = false;
+    package = weylus;
+    users = [ username ];
   };
 
   hardware.graphics.enable = true;

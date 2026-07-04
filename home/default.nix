@@ -29,6 +29,7 @@ in
     ./fcitx.nix
     ./home-packages.nix
     ./kaleido.nix
+    ./weylus.nix
     ./xdg.nix
     ./codex.nix
   ];

@@ -49,6 +49,7 @@ window#waybar {
 #pulseaudio,
 #backlight,
 #tray,
+#custom-weylus,
 #custom-nixos-configuration,
 #custom-screen-recording,
 #clock {
@@ -120,6 +121,18 @@ window#waybar {
 #custom-nixos-configuration.diverged,
 #custom-nixos-configuration.unknown {
   color: var(--warning-color);
+}
+
+#custom-weylus.running {
+  color: var(--theme-selected-bg-color);
+}
+
+#custom-weylus.stopped {
+  color: var(--theme-text-color);
+}
+
+#custom-weylus.failed {
+  color: var(--error-color);
 }
 
 #cpu.critical,

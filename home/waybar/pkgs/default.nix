@@ -7,4 +7,5 @@
   waybarNixosConfigurationStatus = callPackage ./waybar-nixos-configuration-status.nix {
     inherit dotfilesRepositoryPath;
   };
+  waybarWeylusControl = callPackage ./waybar-weylus-control.nix { };
 }
