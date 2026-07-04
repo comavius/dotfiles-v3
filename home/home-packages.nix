@@ -32,5 +32,6 @@
     tinymist
     codex
     gh
+    krita
   ];
 }
