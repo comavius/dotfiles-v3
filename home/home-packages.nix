@@ -33,5 +33,6 @@
     codex
     gh
     krita
+    tokei
   ];
 }
