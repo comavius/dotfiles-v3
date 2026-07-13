@@ -34,5 +34,6 @@
     gh
     krita
     tokei
+    xournalpp
   ];
 }
