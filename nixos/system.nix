@@ -69,6 +69,8 @@ in
     ];
   };
 
+  nixpkgs.config.cudaSupport = lib.mkIf cfg.hasNvidiaGpu true;
+
   system = {
     configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
     stateVersion = cfg.stateVersion;

@@ -1,5 +1,6 @@
 let
   allowedUnfreePackages = [
+    "blender"
     "vscode"
     "discord"
     "google-chrome"
@@ -10,6 +11,7 @@ let
   allowedUnfreePackagePrefixes = [
     "cuda-"
     "cuda_"
+    "cudnn"
     "libcublas"
     "libcufft"
     "libcurand"
