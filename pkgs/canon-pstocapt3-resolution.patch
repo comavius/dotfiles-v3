@@ -1,0 +1,20 @@
+--- a/pstocapt3.c
++++ b/pstocapt3.c
+@@ -556,7 +556,16 @@ char *ppd_mark_to_job_attr(ppd_file_t *p_ppd,
+ 		p_choice = ppdFindMarkedChoice(p_ppd, ppd_opt_name[i]);
+ 		if (p_choice != NULL)
+ 		{
+-			param_list_add(p_list, ppd_opt_name[i], p_choice->choice, strlen(p_choice->choice) + 1);
++			if (strcmp(ppd_opt_name[i], "Resolution") == 0)
++			{
++				char resolution[16];
++				snprintf(resolution, sizeof(resolution), "%d", atoi(p_choice->choice));
++				param_list_add(p_list, ppd_opt_name[i], resolution, strlen(resolution) + 1);
++			}
++			else
++			{
++				param_list_add(p_list, ppd_opt_name[i], p_choice->choice, strlen(p_choice->choice) + 1);
++			}
+ 		}
+ 	}
+ 

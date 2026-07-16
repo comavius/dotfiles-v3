@@ -1,0 +1,20 @@
+diff --git a/contrib/opvp/gdevopvp.c b/contrib/opvp/gdevopvp.c
+index 6d98c8d..a5b0b98 100644
+--- a/contrib/opvp/gdevopvp.c
++++ b/contrib/opvp/gdevopvp.c
+@@ -1808,5 +1808,6 @@ static  char *
+ opvp_get_sizestring(float width, float height)
+ {
++    char *buff = NULL;
+     char nbuff[OPVP_BUFF_SIZE];
+     char nbuff1[OPVP_BUFF_SIZE / 2];
+     char nbuff2[OPVP_BUFF_SIZE / 2];
+@@ -1823,7 +1824,7 @@ opvp_get_sizestring(float width, float height)
+                 opvp_adjust_num_string(nbuff1),
+                 opvp_adjust_num_string(nbuff2));
+ 
+-    return opvp_alloc_string(NULL, nbuff);
++    return opvp_alloc_string(&buff, nbuff);
+ }
+ 
+ static  char *

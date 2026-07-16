@@ -1,5 +1,6 @@
 let
   allowedUnfreePackages = [
+    "canon-capt"
     "vscode"
     "discord"
     "google-chrome"
