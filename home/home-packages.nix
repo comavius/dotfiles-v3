@@ -35,5 +35,6 @@
     krita
     tokei
     xournalpp
+    slack
   ];
 }

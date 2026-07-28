@@ -7,6 +7,7 @@ let
     "steam"
     "steam-unwrapped"
     "ndi"
+    "slack"
   ];
   allowedUnfreePackagePrefixes = [
     "cuda-"
