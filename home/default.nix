@@ -32,6 +32,7 @@ in
     ./weylus.nix
     ./xdg.nix
     ./codex.nix
+    ./zed.nix
   ];
   nix.registry.dots.flake = inputs.self;
 
