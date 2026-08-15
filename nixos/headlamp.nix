@@ -7,8 +7,13 @@
 let
   cfg = config.my;
   domain = "headlamp.${cfg.hostname}.home.arpa";
+  googleCloudSdk = pkgs.google-cloud-sdk.withExtraComponents [
+    pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
+  ];
 in
 {
+  environment.systemPackages = [ googleCloudSdk ];
+
   networking.hosts."127.0.0.1" = [ domain ];
 
   services.nginx = {
@@ -34,8 +39,12 @@ in
     description = "Headlamp Kubernetes web UI";
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
+    path = [ googleCloudSdk ];
 
-    environment.HOME = cfg.homeDirectory;
+    environment = {
+      CLOUDSDK_CONFIG = "${cfg.homeDirectory}/.config/gcloud";
+      HOME = cfg.homeDirectory;
+    };
 
     serviceConfig = {
       User = cfg.username;
