@@ -28,7 +28,7 @@ in
     ./zsh.nix
     ./fcitx.nix
     ./home-packages.nix
-    ./kaleido.nix
+    # ./kaleido.nix
     ./weylus.nix
     ./xdg.nix
     ./codex.nix
