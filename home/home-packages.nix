@@ -5,7 +5,6 @@
     gping
     dive
     fastfetch
-    zellij
     firefox
     loupe
     nautilus
@@ -34,7 +33,6 @@
     gh
     krita
     tokei
-    xournalpp
     slack
   ];
 }
