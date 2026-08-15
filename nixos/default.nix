@@ -3,6 +3,7 @@
   imports = [
     ./desktop.nix
     ./font.nix
+    ./headlamp.nix
     ./stylix.nix
     ./system.nix
     ./virtualisation.nix
