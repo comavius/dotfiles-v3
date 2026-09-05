@@ -41,7 +41,7 @@
 }:
 
 let
-  version = "0.7.7-unstable-2026-08-22";
+  version = "0.7.7-unstable-2026-09-06";
 
   zenzRuntime = callPackage ./mozkey-zenz-runtime.nix { };
 
@@ -53,10 +53,10 @@ let
   bazelPackage = callPackage "${nixpkgs}/pkgs/by-name/ba/bazel_9/build-support/bazelPackage.nix" { };
 
   mozkeySrc = fetchFromGitHub {
-    owner = "koyasi777";
+    owner = "comavius";
     repo = "mozkey";
-    rev = "20645e5cecd685f9b322a45f6b4f8e2a6c2cb011";
-    hash = "sha256-OjiqgxkzjSdGnEE9NEbZ/uCSMbU57C2OsQucHBfegC8=";
+    rev = "f0867583f00f70f6e21af76219477106e8f54f66";
+    hash = "sha256-H6aS5XRGWZOyq++zsD5DEuCY3E88orQKstb4CNi0YEQ=";
   };
 
   fcitxMozcSrc = fetchFromGitHub {
@@ -142,7 +142,6 @@ let
     ];
 
     patches = [
-      ./mozkey-linux-zenz.patch
       ./mozkey-fcitx5-callback.patch
     ];
 
