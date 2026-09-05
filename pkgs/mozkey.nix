@@ -43,6 +43,8 @@
 let
   version = "0.7.7-unstable-2026-08-22";
 
+  zenzRuntime = callPackage ./mozkey-zenz-runtime.nix { };
+
   toolchainRuntimePath = lib.makeLibraryPath [
     stdenv.cc.cc.lib
     stdenv.cc.libc
@@ -104,6 +106,20 @@ let
       --replace-fail \
         '# Qt for Linux' \
         $'# Local Python toolchain\nlocal_runtime_repo = use_repo_rule(\n    "@rules_python//python/local_toolchains:repos.bzl",\n    "local_runtime_repo",\n)\nlocal_runtime_toolchains_repo = use_repo_rule(\n    "@rules_python//python/local_toolchains:repos.bzl",\n    "local_runtime_toolchains_repo",\n)\nlocal_runtime_repo(\n    name = "nix_python3",\n    interpreter_path = "${python3}/bin/python3",\n    on_failure = "fail",\n    dev_dependency = True,\n)\nlocal_runtime_toolchains_repo(\n    name = "nix_python_toolchains",\n    runtimes = ["nix_python3"],\n    dev_dependency = True,\n)\nregister_toolchains("@nix_python_toolchains//:all", dev_dependency = True)\n\n# Fcitx 5\npkg_config_repository(\n    name = "fcitx5",\n    packages = [\n        "Fcitx5Core",\n        "Fcitx5Module",\n    ],\n)\n\n# Qt for Linux'
+
+    substituteInPlace "$out/src/zenz_scorer/BUILD.bazel" \
+      --replace-fail \
+        'target_compatible_with = ["@platforms//os:macos"],' \
+        $'target_compatible_with = select({\n        "@platforms//os:linux": [],\n        "@platforms//os:macos": [],\n        "//conditions:default": ["@platforms//:incompatible"],\n    }),' \
+      --replace-fail \
+        '"@platforms//os:macos": ["main_posix.cc"],' \
+        $'"@platforms//os:linux": ["main_posix.cc"],\n        "@platforms//os:macos": ["main_posix.cc"],' \
+      --replace-fail \
+        $'target_compatible_with = select({\n        "@platforms//os:macos": [],\n        "@platforms//os:windows": [],' \
+        $'target_compatible_with = select({\n        "@platforms//os:linux": [],\n        "@platforms//os:macos": [],\n        "@platforms//os:windows": [],' \
+      --replace-fail \
+        $'deps = ["//zenz:wire_protocol"] + select({\n        "@platforms//os:macos": [\n            ":posix_runtime",\n            "//zenz:unix_socket_path",\n        ],' \
+        $'deps = ["//zenz:wire_protocol"] + select({\n        "@platforms//os:linux": [\n            ":posix_runtime",\n            "//zenz:unix_socket_path",\n        ],\n        "@platforms//os:macos": [\n            ":posix_runtime",\n            "//zenz:unix_socket_path",\n        ],'
   '';
 
   package = bazelPackage {
@@ -122,6 +138,12 @@ let
       "//server:mozc_server"
       "//unix/fcitx5:fcitx5-mozc.so"
       "//unix:icons"
+      "//zenz_scorer:mozc_zenz_scorer"
+    ];
+
+    patches = [
+      ./mozkey-linux-zenz.patch
+      ./mozkey-fcitx5-callback.patch
     ];
 
     commandArgs = [
@@ -130,7 +152,7 @@ let
     ];
 
     bazelRepoCacheFOD = {
-      outputHash = "sha256-AJ6JrBDUgdA5PHV4aVTP8bzJfIfgiuDYwmXUKfC51ck=";
+      outputHash = "sha256-Jpegiqo+Lm7hPXhaMQUG2FRBNeIpplgaibF5O5oehZ8=";
       outputHashAlgo = "sha256";
     };
 
@@ -153,6 +175,17 @@ let
       install -Dm555 bazel-bin/server/mozc_server "$out/lib/mozc/mozc_server"
       install -Dm555 bazel-bin/renderer/qt/mozc_renderer "$out/lib/mozc/mozc_renderer"
       install -Dm555 bazel-bin/gui/tool/mozc_tool "$out/lib/mozc/mozc_tool"
+
+      install -Dm555 \
+        bazel-bin/zenz_scorer/mozc_zenz_scorer \
+        "$out/lib/mozc/ZenzRuntime/mozc_zenz_scorer"
+      ln -s \
+        ${zenzRuntime}/bin/llama-server \
+        "$out/lib/mozc/ZenzRuntime/llama-server"
+      mkdir -p "$out/lib/mozc/ZenzRuntime/models"
+      ln -s \
+        ${zenzRuntime}/models/zenz-v3.2-small-Q5_K_M.gguf \
+        "$out/lib/mozc/ZenzRuntime/models/zenz-v3.2-small-Q5_K_M.gguf"
 
       install -Dm555 bazel-bin/unix/fcitx5/fcitx5-mozc.so "$out/lib/fcitx5/fcitx5-mozc.so"
       install -Dm444 unix/fcitx5/mozc-addon.conf "$out/share/fcitx5/addon/mozc.conf"
@@ -208,6 +241,18 @@ let
       done
 
       install -Dm444 ../LICENSE "$out/share/licenses/mozkey/LICENSE"
+      install -Dm444 \
+        mac/installer/zenz_runtime/licenses/Apache-2.0.txt \
+        "$out/share/licenses/mozkey-zenz/Apache-2.0.txt"
+      install -Dm444 \
+        mac/installer/zenz_runtime/licenses/llama.cpp-MIT.txt \
+        "$out/share/licenses/mozkey-zenz/llama.cpp-MIT.txt"
+      install -Dm444 \
+        mac/installer/zenz_runtime/licenses/zenz-v3.2-small-gguf.txt \
+        "$out/share/licenses/mozkey-zenz/zenz-v3.2-small-gguf.txt"
+      install -Dm444 \
+        mac/installer/zenz_runtime/licenses/THIRD_PARTY_NOTICES.md \
+        "$out/share/licenses/mozkey-zenz/THIRD_PARTY_NOTICES.md"
 
       runHook postInstall
     '';
@@ -240,8 +285,16 @@ package.overrideAttrs (old: {
   meta = {
     description = "Mozkey Japanese input method with an Fcitx 5 frontend";
     homepage = "https://github.com/koyasi777/mozkey";
-    license = lib.licenses.bsd3;
+    license = [
+      lib.licenses.bsd3
+      lib.licenses.mit
+      lib.licenses.asl20
+    ];
     platforms = lib.platforms.linux;
     maintainers = [ ];
+  };
+
+  passthru = (old.passthru or { }) // {
+    inherit zenzRuntime;
   };
 })

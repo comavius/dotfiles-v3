@@ -1,0 +1,140 @@
+diff --git a/unix/fcitx5/mozc_response_parser.cc b/unix/fcitx5/mozc_response_parser.cc
+index c741e1d95..613ad63aa 100644
+--- a/unix/fcitx5/mozc_response_parser.cc
++++ b/unix/fcitx5/mozc_response_parser.cc
+@@ -301,8 +301,7 @@ void MozcResponseParser::ExecuteCallback(const mozc::commands::Output& response,
+     return;
+   }
+ 
+-  mozc::commands::SessionCommand session_command;
+-  session_command.set_type(callback_command.type());
++  mozc::commands::SessionCommand session_command = callback_command;
+ 
+   // TODO(nona): Make a function to handle CONVERT_REVERSE.
+   // Used by CONVERT_REVERSE and/or UNDO
+@@ -317,6 +316,9 @@ void MozcResponseParser::ExecuteCallback(const mozc::commands::Output& response,
+   switch (callback_command.type()) {
+     case mozc::commands::SessionCommand::UNDO:
+       break;
++    case mozc::commands::SessionCommand::APPLY_LIVE_CONVERSION:
++    case mozc::commands::SessionCommand::APPLY_ZENZ_LIVE_CORRECTION:
++      break;
+     case mozc::commands::SessionCommand::CONVERT_REVERSE: {
+       if (!GetSurroundingText(ic, &surrounding_text_info,
+                               engine_->clipboardAddon())) {
+@@ -331,6 +333,13 @@ void MozcResponseParser::ExecuteCallback(const mozc::commands::Output& response,
+   }
+ 
+   auto* mozc_state = engine_->mozcState(ic);
++  if (response.callback().has_delay_millisec() &&
++      response.callback().delay_millisec() > 0) {
++    mozc_state->ScheduleCallback(std::move(session_command),
++                                 response.callback().delay_millisec());
++    return;
++  }
++
+   mozc::commands::Output new_output;
+   if (!mozc_state->SendCommand(session_command, &new_output)) {
+     LOG(ERROR) << "Callback Command Failed";
+@@ -363,6 +372,7 @@ void MozcResponseParser::ExecuteCallback(const mozc::commands::Output& response,
+ bool MozcResponseParser::ParseResponse(const mozc::commands::Output& response,
+                                        InputContext* ic) const {
+   auto* mozc_state = engine_->mozcState(ic);
++  mozc_state->CancelCallback();
+   mozc_state->SetUsage("", "");
+ 
+   UpdateDeletionRange(response, ic);
+diff --git a/unix/fcitx5/mozc_state.cc b/unix/fcitx5/mozc_state.cc
+index df40d8469..5c567a501 100644
+--- a/unix/fcitx5/mozc_state.cc
++++ b/unix/fcitx5/mozc_state.cc
+@@ -449,6 +449,50 @@ bool MozcState::SendCommand(
+   return TrySendRawCommand(session_command, new_output, &error);
+ }
+ 
++void MozcState::ScheduleCallback(
++    mozc::commands::SessionCommand session_command,
++    uint32_t delay_millisec) {
++  callback_command_ = std::move(session_command);
++  const uint64_t trigger_time =
++      now(CLOCK_MONOTONIC) + static_cast<uint64_t>(delay_millisec) * 1000;
++
++  if (!callback_event_) {
++    callback_event_ = engine_->instance()->eventLoop().addTimeEvent(
++        CLOCK_MONOTONIC, trigger_time, 0,
++        [this](EventSourceTime*, uint64_t) {
++          if (!callback_command_) {
++            return false;
++          }
++
++          mozc::commands::SessionCommand command =
++              std::move(*callback_command_);
++          callback_command_.reset();
++
++          mozc::commands::Output output;
++          if (!SendCommand(command, &output)) {
++            LOG(ERROR) << "Delayed Callback Command Failed";
++            return false;
++          }
++
++          ParseResponse(output);
++          // A callback in |output| may have rearmed this one-shot event.
++          return true;
++        });
++    return;
++  }
++
++  callback_event_->setTime(trigger_time);
++  callback_event_->setEnabled(true);
++  callback_event_->setOneShot();
++}
++
++void MozcState::CancelCallback() {
++  callback_command_.reset();
++  if (callback_event_) {
++    callback_event_->setEnabled(false);
++  }
++}
++
+ void MozcState::SetUsage(const std::string& title,
+                          const std::string& description) {
+   title_ = title;
+diff --git a/unix/fcitx5/mozc_state.h b/unix/fcitx5/mozc_state.h
+index 1a198ece7..ac83b9d69 100644
+--- a/unix/fcitx5/mozc_state.h
++++ b/unix/fcitx5/mozc_state.h
+@@ -30,11 +30,13 @@
+ #ifndef MOZC_UNIX_FCITX_FCITX_MOZC_H_
+ #define MOZC_UNIX_FCITX_FCITX_MOZC_H_
+ 
++#include <fcitx-utils/event.h>
+ #include <fcitx-utils/key.h>
+ #include <fcitx/event.h>
+ #include <fcitx/inputcontextproperty.h>
+ #include <fcitx/text.h>
+ 
+ #include <cstdint>
+ #include <memory>
++#include <optional>
+ #include <string>
+@@ -101,6 +103,10 @@ class MozcState : public InputContextProperty {
+   bool SendCommand(const mozc::commands::SessionCommand& session_command,
+                    mozc::commands::Output* new_output);
+ 
++  void ScheduleCallback(mozc::commands::SessionCommand session_command,
++                        uint32_t delay_millisec);
++  void CancelCallback();
++
+   void SetUsage(const std::string& title, const std::string& description);
+ 
+   void DrawAll();
+@@ -147,7 +153,9 @@ class MozcState : public InputContextProperty {
+   InputContext* ic_;
+   MozcEngine* engine_;
+   mutable std::shared_ptr<MozcClientInterface> client_;
++  std::unique_ptr<EventSourceTime> callback_event_;
++  std::optional<mozc::commands::SessionCommand> callback_command_;
+ 
+   mozc::commands::CompositionMode composition_mode_ = mozc::commands::HIRAGANA;
+   mozc::config::Config::PreeditMethod preedit_method_ =
+       mozc::config::Config::ROMAN;

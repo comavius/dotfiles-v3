@@ -1,8 +1,15 @@
-{ inputs, pkgs, ... }:
+{
+  config,
+  inputs,
+  lib,
+  pkgs,
+  ...
+}:
 let
   mozkey-fcitx5 = pkgs.callPackage ../pkgs/mozkey.nix {
     inherit (inputs) nixpkgs;
   };
+  hyprlandSessionTarget = config.wayland.systemd.target;
 in
 {
   i18n.inputMethod = {
@@ -24,5 +31,20 @@ in
         "Groups/0/Items/1".Name = "mozc";
       };
     };
+  };
+
+  systemd.user.services.mozkey-zenz = lib.mkIf (config.my.hostname == "usami") {
+    Unit = {
+      Description = "Mozkey local Zenz correction runtime";
+      After = [ hyprlandSessionTarget ];
+      PartOf = [ hyprlandSessionTarget ];
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "${mozkey-fcitx5}/lib/mozc/ZenzRuntime/mozc_zenz_scorer";
+      Restart = "on-failure";
+      RestartSec = "2s";
+    };
+    Install.WantedBy = [ hyprlandSessionTarget ];
   };
 }
