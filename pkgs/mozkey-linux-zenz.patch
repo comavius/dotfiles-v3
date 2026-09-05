@@ -1,0 +1,107 @@
+diff --git a/session/zenz_client_factory.cc b/session/zenz_client_factory.cc
+index f88785841..14581e103 100644
+--- a/session/zenz_client_factory.cc
++++ b/session/zenz_client_factory.cc
+@@ -69,6 +69,9 @@ std::unique_ptr<ZenzClient> CreateZenzClient() {
+ #if defined(__APPLE__) && TARGET_OS_OSX
+   return std::make_unique<ZenzUnixSocketClient>(
+       ::mozc::zenz::GetZenzUnixSocketPath(), &LaunchMacZenzScorer);
++#elif defined(__linux__)
++  return std::make_unique<ZenzUnixSocketClient>(
++      ::mozc::zenz::GetZenzUnixSocketPath());
+ #else
+   return std::make_unique<ZenzNamedPipeClient>();
+ #endif  // __APPLE__ && TARGET_OS_OSX
+diff --git a/zenz_scorer/llama_server_process.cc b/zenz_scorer/llama_server_process.cc
+index c741180e9..c29a96b08 100644
+--- a/zenz_scorer/llama_server_process.cc
++++ b/zenz_scorer/llama_server_process.cc
+@@ -18,7 +18,6 @@
+ #include <vector>
+ 
+ #include <arpa/inet.h>
+-#include <crt_externs.h>
+ #include <fcntl.h>
+ #include <netinet/in.h>
+ #include <signal.h>
+@@ -29,6 +28,14 @@
+ 
+ #include "zenz_scorer/llama_http_client.h"
+ 
++#if defined(__APPLE__)
++#include <crt_externs.h>
++#else
++// Defined by libc. posix_spawn must inherit the desktop session environment
++// so the Nix runtime can resolve its normal execution environment.
++extern char** environ;
++#endif
++
+ namespace mozc {
+ namespace zenz_scorer {
+ namespace {
+@@ -35,6 +42,14 @@ namespace zenz_scorer {
+ namespace {
+
+ constexpr size_t kApiKeyBytes = 32;
+ constexpr int kMinimumContextSize = 64;
++char** GetProcessEnvironment() {
++#if defined(__APPLE__)
++  return *_NSGetEnviron();
++#else
++  return environ;
++#endif
++}
++
+ constexpr int kMaximumContextSize = 4096;
+ constexpr int kMinimumThreads = 1;
+@@ -467,7 +482,7 @@ bool LlamaServerProcess::Spawn(std::string* error) {
+ 
+   pid_t child_pid = -1;
+   result = ::posix_spawn(&child_pid, options_.executable_path.c_str(), &actions,
+-                         &attributes, argv.data(), *_NSGetEnviron());
++                         &attributes, argv.data(), GetProcessEnvironment());
+ 
+   ::posix_spawnattr_destroy(&attributes);
+   ::posix_spawn_file_actions_destroy(&actions);
+diff --git a/zenz_scorer/main_posix.cc b/zenz_scorer/main_posix.cc
+index 24653043c..f4db39761 100644
+--- a/zenz_scorer/main_posix.cc
++++ b/zenz_scorer/main_posix.cc
+@@ -7,7 +7,10 @@
+ #include <vector>
+ 
+ #include <limits.h>
++#if defined(__APPLE__)
+ #include <mach-o/dyld.h>
++#endif
++#include <unistd.h>
+ 
+ #include "zenz/zenz_unix_socket_path.h"
+ #include "zenz_scorer/posix_runtime.h"
+@@ -31,6 +33,7 @@ std::string JoinPath(std::string_view directory, std::string_view name) {
+ }
+ 
+ std::string GetExecutablePath() {
++#if defined(__APPLE__)
+   uint32_t size = PATH_MAX;
+   std::vector<char> buffer(size, '\0');
+   if (_NSGetExecutablePath(buffer.data(), &size) != 0) {
+@@ -45,6 +48,18 @@ std::string GetExecutablePath() {
+     return resolved;
+   }
+   return buffer.data();
++#elif defined(__linux__)
++  std::vector<char> buffer(PATH_MAX, '\0');
++  const ssize_t size =
++      ::readlink("/proc/self/exe", buffer.data(), buffer.size() - 1);
++  if (size <= 0 || static_cast<size_t>(size) >= buffer.size()) {
++    return "";
++  }
++  buffer[static_cast<size_t>(size)] = '\0';
++  return buffer.data();
++#else
++  return "";
++#endif
+ }
+ 
+ std::string DirectoryName(std::string_view path) {
