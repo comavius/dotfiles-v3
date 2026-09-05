@@ -1,11 +1,16 @@
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
+let
+  mozkey-fcitx5 = pkgs.callPackage ../pkgs/mozkey.nix {
+    inherit (inputs) nixpkgs;
+  };
+in
 {
   i18n.inputMethod = {
     enable = true;
     type = "fcitx5";
     fcitx5 = {
       addons = [
-        pkgs.fcitx5-mozc
+        mozkey-fcitx5
       ];
       waylandFrontend = true;
       settings.inputMethod = {
