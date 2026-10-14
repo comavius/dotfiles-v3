@@ -34,5 +34,6 @@
     krita
     tokei
     slack
+    prismlauncher
   ];
 }
