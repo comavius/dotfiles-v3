@@ -8,8 +8,9 @@ in
   dotfilesRepositoryPath = "${homeDirectory}/projects/dotfiles-v3";
   hasNvidiaGpu = false;
 
-  disk.configSource = "hardware-configuration.nix";
-  disk.hardware-configuration = import ./maeriberry/hardware-configuration.nix;
+  modules = [ ./maeriberry/hardware-configuration.nix ];
+
+  disk.configSource = "disko";
   disk.disko.devices = {
     disk.main = {
       type = "disk";
@@ -33,9 +34,14 @@ in
           root = {
             size = "100%";
             content = {
-              type = "filesystem";
-              format = "ext4";
-              mountpoint = "/";
+              type = "luks";
+              name = "cryptroot";
+              passwordFile = "/run/maeriberry-luks-password";
+              content = {
+                type = "filesystem";
+                format = "ext4";
+                mountpoint = "/";
+              };
             };
           };
         };
