@@ -151,7 +151,7 @@ let
     ];
 
     bazelRepoCacheFOD = {
-      outputHash = "sha256-Jpegiqo+Lm7hPXhaMQUG2FRBNeIpplgaibF5O5oehZ8=";
+      outputHash = "sha256-IcrIK8yXvDgQOZVM/7EVXa29wNfI+6XEm5FbgM2fOok=";
       outputHashAlgo = "sha256";
     };
 
