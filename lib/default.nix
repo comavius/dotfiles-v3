@@ -65,6 +65,7 @@ let
           }
         )
       ]
+      ++ lib.optionals host.isWsl [ ../nixos/wsl.nix ]
       ++ (if hasDiskoConfig then [ inputs.disko.nixosModules.disko ] else [ ])
       ++ host.modules
       ++ (
@@ -125,6 +126,6 @@ in
           type = "app";
           program = "${runVm}/bin/run-${name}-vm";
         }
-      ) config.my.hosts;
+      ) (lib.filterAttrs (_: host: !host.isWsl) config.my.hosts);
     };
 }

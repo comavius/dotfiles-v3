@@ -13,10 +13,10 @@ in
     {
       loader = {
         systemd-boot = {
-          enable = true;
+          enable = !cfg.isWsl;
           configurationLimit = 50;
         };
-        efi.canTouchEfiVariables = true;
+        efi.canTouchEfiVariables = !cfg.isWsl;
       };
     }
     (lib.mkIf cfg.hasNvidiaGpu {
@@ -53,7 +53,7 @@ in
 
   networking = {
     hostName = cfg.hostname;
-    networkmanager.enable = true;
+    networkmanager.enable = !cfg.isWsl;
   };
 
   nix.settings = {

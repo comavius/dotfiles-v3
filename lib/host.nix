@@ -50,6 +50,12 @@
           description = "Whether this host is virtual machine or not.";
         };
 
+        isWsl = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Whether this host runs under Windows Subsystem for Linux.";
+        };
+
         initialPassword = lib.mkOption {
           type = lib.types.str;
           default = "nixos";
@@ -61,8 +67,9 @@
             type = lib.types.enum [
               "disko"
               "hardware-configuration.nix"
+              "none"
             ];
-            default = "disko";
+            default = if config.isWsl then "none" else "disko";
             description = "Source used to configure disks in the NixOS system.";
           };
           hardware-configuration = lib.mkOption {
